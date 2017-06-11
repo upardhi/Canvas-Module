@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fit Canvas Within Perticular area Using this code your canvas will fit inside any container </title>
+<meta charset="UTF-8">
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"> </script>
+
+
+ <script type="text/html" id='canvas-template'>
+		<% _.each(viewList,function(view,key,list){   %>
+       
+                    <div class="view-wrapper" data-editor-view-id="<%=view.viewId %>"  style="width:<%=view.imageWidth%>px; height:<%=view.imageHeight%>px; position:relative">
+						<img data-component-type="product-image" src="<%=view.imageSrc%>" class="productImage"  width="<%=view.imageWidth%>" height="<%=view.imageHeight%>"  />
+						<div class="canvas-wrapper"  style="position:absolute; width:<%=view.width%>px; height:<%=view.height%>px; left: <%=view.left%>px; top: <%=view.top%>px;">
+								<canvas id="<%=view.applicationType%>_<%=view.viewId%>" width="<%=view.width%>" height="<%=view.height%>" ></canvas>
+						</div>
+					</div>
+        <% }); %>
+
+</script>
+ 
+ 
+<body>
+
+<div  id="target_container"  style="width:500px; height:500px;">
+
+	
+
+</div>
+
+<script>
+	var viewDetailsList=[
+		{
+		"width":500,"height":400,"top":0,"left":105,"imageWidth":800,"imageHeight":800,"viewId":2603,"title":"front","imageSrc":"800px.jpg","applicationType":"editor"
+		}]
+		var template = $("#canvas-template").html();
+		$('#target_container').html(_.template(template)({viewList:viewDetailsList}));
+ 
+		var $targetContainer=$('#target_container');
+		function calculateScaleFactor(viewId) {
+			var viewContainer = $('[data-editor-view-id="' + viewId + '"]');
+			var cssWidthScale = $targetContainer.width() / viewContainer.width();
+			var cssHeightScale = $targetContainer.height() / viewContainer.height();
+			var scaleFactor = Math.min(cssWidthScale, cssHeightScale);
+			return scaleFactor;
+		}
+		/* Fit Canvas to perticular target or div according to width and height of div 
+		 Let's say If I wan to fix perticular canvas of width 1000px and height 1000px to 500px by 500px then I waant to calculate the scaleFactor for fitting 1000px canvas inside the 500px area. 
+		*/
+		function setCanvasCSS(viewId){
+			var scaleFactor= calculateScaleFactor(viewId);
+			var viewContainer = $('[data-editor-view-id="' + viewId + '"]');
+			var scaling= 'scale(' + scaleFactor + ',' + scaleFactor + ')'
+			viewContainer.css({'transform': scaling,'-webkit-transform': scaling,'-moz-transform': scaling,'-o-transform': scaling});
+			var leftPos = ($targetContainer.width() - viewContainer.width() * scaleFactor) / 2;
+			var topPos = ($targetContainer.height() - viewContainer.height() * scaleFactor) / 2;
+			viewContainer.css({'left': leftPos,'top':topPos});
+		}
+		/* Iteration for Multiple Views*/
+		$.each(viewDetailsList,function(key, view){
+			setCanvasCSS(view.viewId);
+		})
+</script>  
+
+<style>
+ #target_container{border:1px solid red;}
+ .view-wrapper{transform-origin:0% 0%;overflow:hidden;}
+ .canvas-wrapper{border: 5px solid green;}
+ 
+
+</style>
+	
+</body>
+</html>
+
+
